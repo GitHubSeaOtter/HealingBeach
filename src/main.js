@@ -12,14 +12,13 @@ catch (cause) { console.error(cause); error('3D描画を開始できませんで
 if (beach) start(beach);
 
 function start({ camera, renderer, resize, render, setHour }) {
-  let entered = false, settingsOpen = false, yaw = 0, pitch = -0.10;
+  let settingsOpen = false, yaw = 0, pitch = -0.10;
   let position = { x: 0, z: 13 }, hour = 14, autoTime = false, quality = 'auto';
   let clock = 0, lastFrame = 0, animation = 0, frameSum = 0, frameCount = 0, ratio;
   let soundBusy = false, noticeTimer, previousFocus;
   const input = { x: 0, y: 0 }, keys = new Set();
-  const motionReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function notify(message) { clearTimeout(noticeTimer); $('notice').textContent = message; $('notice').hidden = false; noticeTimer = setTimeout(() => { $('notice').hidden = true; }, 4000); }
-  function updateSoundButton() { $('sound-toggle').setAttribute('aria-pressed', String(audio.playing)); $('sound-toggle').setAttribute('aria-label', audio.playing ? '音を停止' : '音を再生'); }
+  function updateSoundButton() { $('sound-toggle').setAttribute('aria-pressed', String(audio.playing)); $('sound-toggle').setAttribute('aria-label', audio.playing ? '音を停止' : '音を再生'); $('sound-hint').hidden = audio.playing; }
   async function playSound() {
     if (soundBusy) return;
     soundBusy = true;
@@ -30,14 +29,6 @@ function start({ camera, renderer, resize, render, setHour }) {
     if (audio.playing) { soundBusy = true; try { await audio.pause(); } finally { soundBusy = false; updateSoundButton(); } }
     else await playSound();
   });
-  $('enter').addEventListener('click', () => {
-    if (entered) return;
-    entered = true;
-    $('welcome').classList.add('departing');
-    setTimeout(() => { $('welcome').hidden = true; $('reset-view').focus({ preventScroll: true }); }, motionReduced ? 0 : 600);
-    $('controls').hidden = false; $('scene-caption').hidden = false;
-    if (!audio.playing) void playSound();
-  });
   function resetView() { position = { x: 0, z: 13 }; yaw = 0; pitch = -0.10; resetInput(); }
   $('reset-view').addEventListener('click', resetView);
   document.querySelector('.brand').addEventListener('click', event => { event.preventDefault(); resetView(); });
@@ -46,7 +37,7 @@ function start({ camera, renderer, resize, render, setHour }) {
     settingsOpen = open; resetInput();
     $('settings').hidden = !open; $('settings-scrim').hidden = !open;
     $('settings-toggle').setAttribute('aria-expanded', String(open));
-    for (const id of ['welcome', 'controls', 'scene-caption']) $(id).inert = open;
+    for (const id of ['controls', 'scene-caption']) $(id).inert = open;
     document.querySelector('.topbar').inert = open;
     if (open) { previousFocus = document.activeElement; $('settings-close').focus(); }
     else (previousFocus || $('settings-toggle')).focus();
@@ -65,14 +56,14 @@ function start({ camera, renderer, resize, render, setHour }) {
       }
       return;
     }
-    if (entered && ['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.code)) { event.preventDefault(); keys.add(event.code); }
+    if (['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.code)) { event.preventDefault(); keys.add(event.code); }
   });
   document.addEventListener('keyup', event => keys.delete(event.code));
   window.addEventListener('blur', resetInput);
 
   let lookPointer = null, lookX = 0, lookY = 0, joystickPointer = null;
   $('scene').addEventListener('pointerdown', event => {
-    if (!entered || settingsOpen || lookPointer !== null) return;
+    if (settingsOpen || lookPointer !== null) return;
     lookPointer = event.pointerId; lookX = event.clientX; lookY = event.clientY; $('scene').setPointerCapture(event.pointerId);
   });
   $('scene').addEventListener('pointermove', event => {
@@ -133,7 +124,7 @@ function start({ camera, renderer, resize, render, setHour }) {
   function frame(timestamp) {
     const elapsed = lastFrame ? Math.min((timestamp - lastFrame) / 1000, 0.1) : 0;
     lastFrame = timestamp; clock += elapsed;
-    if (entered && !settingsOpen) {
+    if (!settingsOpen) {
       const keyboardX = Number(keys.has('KeyD') || keys.has('ArrowRight')) - Number(keys.has('KeyA') || keys.has('ArrowLeft'));
       const keyboardY = Number(keys.has('KeyW') || keys.has('ArrowUp')) - Number(keys.has('KeyS') || keys.has('ArrowDown'));
       position = movePosition(position, { x: clamp(input.x + keyboardX,-1,1), y: clamp(input.y + keyboardY,-1,1) }, yaw, elapsed);
