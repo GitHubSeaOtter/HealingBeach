@@ -26,7 +26,9 @@ const [bundle, stylesheet, template, icon] = await Promise.all([
   readFile(resolve(root, 'public/favicon.svg')),
 ]);
 
-const javascript = bundle.outputFiles[0].text;
+// Shader template literals retain indentation through minification. Strip
+// insignificant line-end whitespace so the generated file passes Git checks.
+const javascript = bundle.outputFiles[0].text.replace(/[\t ]+$/gm, '');
 const buildId = createHash('sha256').update(template).update(stylesheet.code).update(javascript).update(icon).digest('hex').slice(0, 12);
 const replacements = [
   ['<link rel="stylesheet" href="./style.css" />', `<style>${stylesheet.code.replace(/<\/style/gi, '<\\/style')}</style>`],
