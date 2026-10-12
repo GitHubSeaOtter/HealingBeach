@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: './',
-  build: {
-    rollupOptions: { output: { manualChunks: { three: ['three'] } } },
-  },
+  root: 'src',
+  publicDir: '../public',
+  build: { outDir: '../dist' },
 });

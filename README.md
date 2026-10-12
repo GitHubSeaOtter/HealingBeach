@@ -3,6 +3,8 @@
 iPhoneのSafariで、あなただけの南国ビーチを散歩する3Dブラウザアプリです。
 Three.js / WebGL 2 と Web Audio API を使用し、画像・音源の外部配信サービスを必要としません。
 
+公開先: https://githubseaotter.github.io/HealingBeach/
+
 ## できること
 
 - GPUで動く波、浅瀬の光、波打ち際の泡、反射する太陽、夜空と月。
@@ -37,8 +39,11 @@ npm run build
 npm run preview
 ```
 
-`dist/` を任意の静的Webホスティングで配信できます。相対パスでビルドするので、GitHub Pages等のサブディレクトリにも配置可能です。
-`file://` で直接開かず、HTTP/HTTPSで配信してください。mainへのpush時にGitHub Actionsがテストとビルドを実行し、配信用成果物を保存します。ホスティングの自動公開は行いません。
+`npm run build` は、CSS・JavaScript・Three.js・アイコンを内包した単一の配布用 `index.html` をリポジトリ直下と `dist/` に出力します。実行時に `/src/main.js` や外部のCSSファイルを読み込む必要がないので、GitHub Pagesの `/HealingBeach/` 配下でも、そのまま動作します。
+
+GitHub Pagesは **main / (root)** を公開元として使用します。リポジトリ直下の `index.html` は生成物として追跡しています。ソースを編集したら `npm run build` を実行し、生成した `index.html` も一緒にコミットしてください。GitHub Actionsは生成物とソースの一致、テスト、ビルドを確認し、配信用成果物を保存します。
+
+別の静的ホスティングを使う場合も、この `index.html` 一つを配置すれば動作します。iPhoneではHTMLファイルのプレビューではなく、HTTP/HTTPSの公開URLをSafariで開いてください。
 
 ## 対応と検証範囲
 
@@ -47,10 +52,15 @@ WebGL 2とWeb Audioに対応する現行iPhone Safariを対象とします。横
 
 ユニットテストでは移動方向、歩行範囲、復帰時の移動量、時間の周回、音楽の周波数を検証します。実機iPhoneでの描画品質、長時間の発熱・電池消費、音質は別途確認が必要です。
 
+配布形式の回帰テストでは、Pages用HTMLにCSSとアプリが内包され、外部スクリプト・CSSの取得やブラウザのモジュール解決が不要であることを確認します。`/HealingBeach/` を模した静的サーバーでも、HTML一つの取得だけで起動・タッチ操作・音・設定が動くことをChromiumで確認済みです。
+
 初版はChromiumのiPhone 13エミュレーションで、本番ビルドの2本指操作、縦横表示、音の開始・停止・再開、3種類の音楽、時間・画質変更、設定の再読み込みを確認済みです。実機Safariでの検証を代替するものではありません。
 
 ## 構成
 
+- `src/index.html`: 開発用HTMLテンプレート
+- `scripts/build.mjs`: Safari向けの単一HTML生成
+- `index.html`: GitHub Pagesで直接配信する生成済みアプリ
 - `src/scene.js`: Three.jsのシーンと手続き的な植物・建物
 - `src/shaders.js`: GPUの海・空シェーダー
 - `src/audio.js`: 環境音と楽器音色の生成、再生制御

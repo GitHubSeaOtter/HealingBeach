@@ -1,4 +1,3 @@
-import './style.css';
 import { createBeach } from './scene.js';
 import { IslandAudio } from './audio.js';
 import { clamp, cycleHour, groundHeight, movePosition } from './world.js';
@@ -6,7 +5,7 @@ import { clamp, cycleHour, groundHeight, movePosition } from './world.js';
 const $ = id => document.getElementById(id);
 const audio = new IslandAudio();
 let beach;
-function error(message) { $('error-message').textContent = message; $('error').hidden = false; }
+function error(message) { $('loading').hidden = true; $('error-message').textContent = message; $('error').hidden = false; }
 try { beach = createBeach($('scene')); }
 catch (cause) { console.error(cause); error('3D描画を開始できませんでした。WebGL 2に対応したiPhoneのSafariなどで、もう一度お試しください。'); }
 if (beach) start(beach);
@@ -149,4 +148,5 @@ function start({ camera, renderer, resize, render, setHour }) {
     else { animation = requestAnimationFrame(frame); try { await audio.resumeFromBackground(); if (audio.context && audio.playing && audio.context.state !== 'running') { audio.playing = false; notify('音のボタンをタップすると再開します。'); } } catch { audio.playing = false; notify('音のボタンをタップすると再開します。'); } updateSoundButton(); }
   });
   $('scene').addEventListener('webglcontextlost', event => { event.preventDefault(); cancelAnimationFrame(animation); void audio.pause(); error('描画が中断されました。「もう一度開く」でビーチに戻れます。省電力設定もお試しください。'); });
+  $('loading').hidden = true;
 }

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#102d32" />
+    <meta name="description" content="波の音に包まれながら、あなただけの南国ビーチを散歩。時間、音楽、景色を自由に。" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>NAMI — あなただけのビーチ</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./style.css" />
+    <script>
+      window.addEventListener('error', function () {
+        var loading = document.getElementById('loading');
+        var error = document.getElementById('error');
+        if (loading) loading.hidden = true;
+        if (error) error.hidden = false;
+      });
+    </script>
+  </head>
+  <body>
+    <div id="loading" class="loading" role="status">ビーチを準備しています…</div>
+    <noscript><div class="error" role="alert"><h2>JavaScriptを有効にしてください</h2><p>Safariの設定でJavaScriptを有効にすると、ビーチを開けます。</p></div></noscript>
+    <canvas id="scene" aria-label="南国のビーチ。画面をドラッグして見回せます。"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="NAMI ホーム"><svg viewBox="0 0 36 24" aria-hidden="true"><path d="M1 15c7-12 11 12 18 0s11 12 16 0M1 7c7-12 11 12 18 0s11 12 16 0"/></svg><span>NAMI<small>PRIVATE ISLAND</small></span></a>
+      <div class="top-actions">
+        <span class="live-pill"><i></i><span id="time-label">午後のひととき</span></span>
+        <button id="sound-toggle" class="icon-button" aria-label="音を再生" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4zM15 8c3 2 3 6 0 8M18 5c5 4 5 10 0 14"/></svg></button>
+        <button id="settings-toggle" class="icon-button" aria-label="設定を開く" aria-controls="settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="16" cy="17" r="3"/></svg></button>
+      </div>
+    </header>
+
+    <div class="scene-caption" id="scene-caption"><span>YOUR LITTLE ESCAPE</span><p>波のリズムで、ひと休み。</p><small id="sound-hint">音ボタンで、波の音を。</small></div>
+    <div id="controls" class="controls">
+      <div id="joystick" class="joystick" role="group" aria-label="移動パッド。上下左右にドラッグして移動"><div class="joystick-ring"></div><div id="stick" class="stick"></div><span>歩く</span></div>
+      <div class="look-hint"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 14h18M14 5v18m-9-9 3-3m-3 3 3 3m15-3-3-3m3 3-3 3"/></svg><span>ドラッグで見回す</span></div>
+      <button id="reset-view" class="text-button">はじめの景色へ <span>↺</span></button>
+    </div>
+    <footer class="footer"><span>04° 17′ N &nbsp; 73° 28′ E <small>AN IMAGINED PARADISE</small></span><span class="footer-right">BREATHE IN. BREATHE OUT.</span></footer>
+
+    <div id="settings-scrim" class="scrim" hidden></div>
+    <aside id="settings" class="settings" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+      <div class="panel-heading"><div><span class="eyebrow">MAKE IT YOURS</span><h2 id="settings-title">島での過ごし方</h2></div><button id="settings-close" class="icon-button" aria-label="設定を閉じる">✕</button></div>
+      <section><div class="section-label">空の色 <output id="clock">14:00</output></div>
+        <div class="time-presets"><button data-hour="7">朝</button><button data-hour="14" class="selected" aria-pressed="true">昼</button><button data-hour="18">夕暮れ</button><button data-hour="22">夜</button></div>
+        <label class="range-label" for="hour">時間帯<input id="hour" type="range" min="0" max="23.99" step="0.01" value="14" /></label>
+        <label class="toggle-row" for="auto-time">ゆっくり時間を進める <input id="auto-time" type="checkbox" /><span class="toggle" aria-hidden="true"></span></label>
+        <small class="subnote">オンにすると、約12分で一日が巡ります。</small>
+      </section>
+      <section><div class="section-label">島の音楽 <span>ORIGINAL SOUNDS</span></div><label class="select-label" for="music">音楽を選ぶ<select id="music"><option value="kalimba">カリンバ · 木漏れ日</option><option value="flute">竹笛 · 海風</option><option value="handpan">ハンドパン · 月あかり</option><option value="none">音楽なし</option></select></label>
+        <label class="range-label" for="music-volume">音楽の音量<input id="music-volume" type="range" min="0" max="1" step="0.01" value="0.42" /></label>
+        <label class="range-label" for="nature-volume">波・風・鳥の音<input id="nature-volume" type="range" min="0" max="1" step="0.01" value="0.7" /></label>
+        <small class="subnote">楽器の響きをイメージした、島だけの生成音楽。</small>
+      </section>
+      <section><div class="section-label">描画品質</div><div class="quality-options"><button data-quality="auto" class="selected" aria-pressed="true">自動</button><button data-quality="high">高画質</button><button data-quality="low">省電力</button></div><small class="subnote">自動では端末に合わせて解像度を調整します。</small></section>
+      <p class="help-text">左のパッドで歩く · 景色をドラッグして見回す<br>PCでは WASD / 矢印キーで移動できます。</p>
+    </aside>
+    <div class="notice" id="notice" role="status" hidden></div>
+    <div id="error" class="error" role="alert" hidden><h2>景色を開けませんでした</h2><p id="error-message">Safariを更新して、もう一度お試しください。</p><button onclick="location.reload()">もう一度開く</button></div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
